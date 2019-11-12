@@ -1,0 +1,12 @@
+---
+- hosts: worker-machine
+  vars:
+    check: bash -x status.sh
+  tasks:
+    - name: "copy status script"
+      copy: src="../status.sh" dest="/home/ubuntu"
+    - name: Checking up environment
+      shell: "{{ check }}"
+      become: yes
+    - name: Cleaning up
+      shell: rm status.sh
