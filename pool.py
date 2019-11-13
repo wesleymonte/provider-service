@@ -89,19 +89,22 @@ def run_provider(tokens):
     _, pool_name, provider, ip = tokens
     if pool_name in pools:
         pool = pools[pool_name]
-        if ip in pool["nodes"]:
-            if provider == "ansible":
-                pool["nodes"]
-                result = provision(ip)
-                if result:
-                    pool["nodes"].append(ip)
-                    save(pools)
-                    msg = "Node added successfully"
-                    result = True
+        for node in pool["nodes"]:
+            if node["ip"] == ip:
+                if provider == "ansible": 
+                    node["state"] = "PROVISIONING"
+                    result = provision(ip)
+                    if result:
+                        node["state"] = "PROVISIONED"
+                        save(pools)
+                        msg = "Node added successfully"
+                        result = True
+                    else:
+                        node["state"] = "NOT_PROVISIONED"
+                        msg = "An error occurred while running provider"
                 else:
-                    msg = "An error occurred while running provider"
-            else:
-                msg = "Provider not found!"
+                    msg = "Provider not found!"
+                break
         else:
             msg = "Ip not exists"
     else:
@@ -122,8 +125,6 @@ def run_add(tokens):
                     save(pools)
                     msg = "Node added successfully"
                     result = True
-                else:
-                    msg = "An error occurred while adding node"
             else:
                 msg = "Provider not found!"
         else:

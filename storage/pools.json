@@ -3,16 +3,16 @@
         "name": "poolet",
         "nodes": [
             {
-                "ip":"10.30.5.1",
-                "state":"NOT_PROVISIONED"
+                "ip": "10.30.5.1",
+                "state": "NOT_PROVISIONED"
             },
             {
-                "ip":"10.30.50.1",
-                "state":"PROVISIONING"
+                "ip": "10.30.50.1",
+                "state": "PROVISIONING"
             },
             {
-                "ip":"10.11.5.30",
-                "state":"PROVISIONED"
+                "ip": "10.11.5.30",
+                "state": "PROVISIONED"
             }
         ]
     },
@@ -20,17 +20,21 @@
         "name": "pooletinho",
         "nodes": [
             {
-                "ip":"10.11.16.16",
-                "state":"NOT_PROVISIONED"
+                "ip": "10.11.16.16",
+                "state": "NOT_PROVISIONED"
             },
             {
-                "ip":"10.11.16.28",
-                "state":"PROVISIONING"
+                "ip": "10.11.16.28",
+                "state": "PROVISIONING"
             },
             {
-                "ip":"10.11.16.42",
-                "state":"PROVISIONED"
+                "ip": "10.11.16.42",
+                "state": "PROVISIONED"
             }
         ]
+    },
+    "pooletinho2": {
+        "name": "pooletinho2",
+        "nodes": []
     }
 }

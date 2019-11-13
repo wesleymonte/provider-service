@@ -35,7 +35,7 @@ def add_pool():
         if name == None or name.strip() == "":
             return {"error":"invalid pool name"}, 400
         args=["create", name]
-        response = pool.create(args)
+        response = pool.run_create(args)
         if not response.get("result"):
             return {"error": "Error while creating pool [" + name + "]: " + response.get("msg")}, 404
         return {"msg": response.get("msg")}, 200
@@ -53,6 +53,9 @@ def add_node(poolname):
         response = pool.run_add(args)
         if not response.get("result"):
             return {"error": "Error while adding node [" + poolname + "]: " + response.get("msg")}, 404
+        response = pool.run_provider(args)
+        if not response.get("result"):
+            return {"error": "Error while providering node [" + poolname + "]: " + response.get("msg")}, 404
         return {"msg": response.get("msg")}, 200
     else:
         return {"error":"Invalid request"}, 400
