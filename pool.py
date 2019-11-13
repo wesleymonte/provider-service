@@ -3,8 +3,17 @@ import sys
 import os
 import subprocess
 from util import to_response
+from enum import Enum
+from filelock import FileLock
+import time
+
+class State(Enum):
+    NOT_PROVISIONED = "not_provisioned"
+    PROVISIONING = "provisioning"
+    PROVISIONED = "provisioned"
 
 default_storage_path = './storage/pools.json'
+default_lock_path = './storage/pools.json.lock'
 default_public_key_path = "./keys/pp.pub"
 
 # Read from default path and return a dict
@@ -18,6 +27,24 @@ def load():
 def save(dict):
     with open(default_storage_path, 'w+') as file:
         json.dump(dict, file, sort_keys=True, indent=4)
+
+def add_node(pool_name, ip):
+    lock = FileLock(default_lock_path)
+    with lock:
+        pools = load()
+        pools[pool_name]["nodes"].append({"ip":ip, "state":State.NOT_PROVISIONED.value})
+        save(pools)
+
+def update_node_state(pool_name, ip, state):
+    lock = FileLock(default_lock_path)
+    with lock:
+        pools = load()
+        time.sleep(10)
+        for node in pools[pool_name]["nodes"]:
+            if node["ip"] == ip:
+                node["state"] = state
+                break
+        save(pools)
 
 def write_ip(ip):
     config_file_path = "worker-deployment/hosts.conf"
@@ -71,15 +98,17 @@ def run_status(tokens):
 
 # TODO validate pool name
 def run_create(tokens):
-    pools = load()
-    _, pool_name = tokens
-    if pool_name not in pools:
-        pool = {"name":pool_name, "nodes":[]}
-        pools[pool_name] = pool
-        save(pools)
-        return to_response("Create pool [" + pool_name + "]", True )
-    else:
-        return to_response("Pool already exists", False)
+    lock = FileLock(default_lock_path)
+    with lock:
+        pools = load()
+        _, pool_name = tokens
+        if pool_name not in pools:
+            pool = {"name":pool_name, "nodes":[]}
+            pools[pool_name] = pool
+            save(pools)
+            return to_response("Create pool [" + pool_name + "]", True )
+        else:
+            return to_response("Pool already exists", False)
 
 def run_provider(tokens):
     result = False
@@ -92,15 +121,14 @@ def run_provider(tokens):
         for node in pool["nodes"]:
             if node["ip"] == ip:
                 if provider == "ansible": 
-                    node["state"] = "PROVISIONING"
+                    update_node_state(pool_name, ip, State.PROVISIONING.value)
                     result = provision(ip)
                     if result:
-                        node["state"] = "PROVISIONED"
-                        save(pools)
+                        update_node_state(pool_name, ip, State.PROVISIONED.value)
                         msg = "Node added successfully"
                         result = True
                     else:
-                        node["state"] = "NOT_PROVISIONED"
+                        update_node_state(pool_name, ip, State.NOT_PROVISIONED.value)
                         msg = "An error occurred while running provider"
                 else:
                     msg = "Provider not found!"
@@ -121,10 +149,9 @@ def run_add(tokens):
         pool = pools[pool_name]
         if ip not in pool["nodes"]:
             if provider == "ansible":
-                    pool["nodes"].append({"ip":ip, "state":"NOT_PROVISIONED"})
-                    save(pools)
-                    msg = "Node added successfully"
-                    result = True
+                add_node(pool_name, ip)
+                msg = "Node added successfully"
+                result = True
             else:
                 msg = "Provider not found!"
         else:

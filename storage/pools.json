@@ -30,11 +30,19 @@
             {
                 "ip": "10.11.16.42",
                 "state": "PROVISIONED"
+            },
+            {
+                "ip": "10.11.16.210",
+                "state": "provisioned"
             }
         ]
     },
     "pooletinho2": {
         "name": "pooletinho2",
+        "nodes": []
+    },
+    "pooletinho32": {
+        "name": "pooletinho32",
         "nodes": []
     }
 }
