@@ -11,9 +11,9 @@ app = flask.Flask(__name__)
 app.config["DEBUG"] = True
 
 
-@app.route('/', methods=['GET'])
+@app.route('/version', methods=['GET'])
 def home():
-    return "<h1>Distant Reading Archive</h1><p>This site is a prototype API for distant reading of science fiction novels.</p>"
+    return {"version":"0.0.1"}
 
 @app.route('/api/v1/pools', methods=['GET'])
 def get_pools():
