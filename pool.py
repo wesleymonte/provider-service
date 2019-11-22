@@ -11,6 +11,7 @@ class State(Enum):
     NOT_PROVISIONED = "not_provisioned"
     PROVISIONING = "provisioning"
     PROVISIONED = "provisioned"
+    FAILED = "failed"
 
 default_storage_path = './storage/pools.json'
 default_lock_path = './storage/pools.json.lock'
@@ -118,23 +119,23 @@ def run_provider(tokens):
     _, pool_name, provider, ip = tokens
     if pool_name in pools:
         pool = pools[pool_name]
-        for node in pool["nodes"]:
-            if node["ip"] == ip:
-                if provider == "ansible": 
-                    update_node_state(pool_name, ip, State.PROVISIONING.value)
-                    result = provision(ip)
-                    if result:
-                        update_node_state(pool_name, ip, State.PROVISIONED.value)
-                        msg = "Node added successfully"
-                        result = True
-                    else:
-                        update_node_state(pool_name, ip, State.NOT_PROVISIONED.value)
-                        msg = "An error occurred while running provider"
+        matching_ips = [node["ip"] for node in pool["nodes"] if node["ip"] == ip]
+        if matching_ips:
+            if provider == "ansible": 
+                update_node_state(pool_name, ip, State.PROVISIONING.value)
+                result = True
+                # result = provision(ip)
+                if result:
+                    update_node_state(pool_name, ip, State.PROVISIONED.value)
+                    msg = "Node added successfully"
+                    result = True
                 else:
-                    msg = "Provider not found!"
-                break
+                    update_node_state(pool_name, ip, State.FAILED.value)
+                    msg = "An error occurred while running provider"
+            else:
+                msg = "Provider not found!"
         else:
-            msg = "Ip not exists"
+            msg = "Ip not found"
     else:
         msg = "Pool not found!"
     return to_response(msg, result)
@@ -155,7 +156,8 @@ def run_add(tokens):
             else:
                 msg = "Provider not found!"
         else:
-            msg = "Pool already exists"
+            result = True
+            msg = "Node already exists"
     else:
         msg = "Pool not found!"
     return to_response(msg, result)
