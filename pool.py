@@ -147,7 +147,8 @@ def run_add(tokens):
     _, pool_name, provider, ip = tokens
     if pool_name in pools:
         pool = pools[pool_name]
-        if ip not in pool["nodes"]:
+        matching_ips = [node["ip"] for node in pool["nodes"] if node["ip"] == ip]
+        if not matching_ips:
             if provider == "ansible":
                 add_node(pool_name, ip)
                 msg = "Node added successfully"
