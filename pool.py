@@ -123,8 +123,7 @@ def run_provider(tokens):
         if matching_ips:
             if provider == "ansible": 
                 update_node_state(pool_name, ip, State.PROVISIONING.value)
-                result = True
-                # result = provision(ip)
+                result = provision(ip)
                 if result:
                     update_node_state(pool_name, ip, State.PROVISIONED.value)
                     msg = "Node added successfully"
