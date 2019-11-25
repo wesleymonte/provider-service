@@ -40,7 +40,6 @@ def update_node_state(pool_name, ip, state):
     lock = FileLock(default_lock_path)
     with lock:
         pools = load()
-        time.sleep(10)
         for node in pools[pool_name]["nodes"]:
             if node["ip"] == ip:
                 node["state"] = state
