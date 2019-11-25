@@ -5,7 +5,6 @@ import subprocess
 from util import to_response
 from enum import Enum
 from filelock import FileLock
-import time
 
 class State(Enum):
     NOT_PROVISIONED = "not_provisioned"
@@ -118,7 +117,7 @@ def run_provider(tokens):
     _, pool_name, provider, ip = tokens
     if pool_name in pools:
         pool = pools[pool_name]
-        matching_ips = [node["ip"] for node in pool["nodes"] if node["ip"] == ip or node["state"] == State.FAILED.value]
+        matching_ips = [node["ip"] for node in pool["nodes"] if node["ip"] == ip]
         if matching_ips:
             if provider == "ansible": 
                 update_node_state(pool_name, ip, State.PROVISIONING.value)
