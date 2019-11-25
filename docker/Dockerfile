@@ -2,6 +2,8 @@ FROM python
 
 WORKDIR /service
 
+EXPOSE 5000
+
 RUN pip3 install flask
 
 RUN pip3 install filelock
