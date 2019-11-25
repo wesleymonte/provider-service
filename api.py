@@ -73,4 +73,4 @@ def get_public_key():
     response = pool.get_public_key()
     return {"public_key": response}
 
-app.run()
+app.run(host='0.0.0.0')

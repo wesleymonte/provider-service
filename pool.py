@@ -12,9 +12,9 @@ class State(Enum):
     PROVISIONED = "provisioned"
     FAILED = "failed"
 
-default_storage_path = './storage/pools.json'
-default_lock_path = './storage/pools.json.lock'
-default_public_key_path = "./keys/pp.pub"
+default_storage_path = '/service/storage/pools.json'
+default_lock_path = '/service/storage/pools.json.lock'
+default_public_key_path = "/service/keys/pp.pub"
 
 # Read from default path and return a dict
 def load():
@@ -75,7 +75,7 @@ def provision(ip):
 
 def check(ip):
     write_ip(ip)
-    _dir = "worker-deployment/"
+    _dir = "/service/worker-deployment/"
     command = "bash check.sh"
     os.chdir(_dir)
     exit_value = os.system(command)
