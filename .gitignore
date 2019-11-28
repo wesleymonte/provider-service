@@ -3,3 +3,5 @@ keys/*
 !keys/.gitkeep
 
 .vscode/
+
+*.pyc
