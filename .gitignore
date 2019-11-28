@@ -4,4 +4,6 @@ keys/*
 
 .vscode/
 
-*.pyc
+**/*.pyc
+
+**/__pycache__
