@@ -30,7 +30,7 @@ def main():
     else:
         print(resource)
         ip = http_helper.get_public_ip(my_token, resource['public_ip_id'])["ip"]
-        print("ip ": ip)
+        print("ip: " + ip)
         sys.exit(0)
 
 if __name__== "__main__":
