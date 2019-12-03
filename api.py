@@ -6,6 +6,7 @@ import os
 import subprocess
 import pool
 import json as js
+import provider.fogbow.fogbow
 
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
@@ -72,5 +73,19 @@ def get_pool_status(poolname):
 def get_public_key():
     response = pool.get_public_key()
     return {"public_key": response}
+
+@app.route('/api/v1/provider/fogbow', methods=['POST'])
+def request_to_fogbow_provider():
+    if request.is_json:
+        pool_id = request.json.get("pool_id")
+        amount = request.json.get("amount")
+        spec = request.json.get("spec")
+        if spec != None:
+            pool.async_provider_nodes(pool_id, spec, amount)
+        else:
+            return {"error": "Error while request fogbow resources [" + poolname + "]"}, 404
+    else:
+        return {"error":"Invalid request"}, 400
+
 
 app.run()

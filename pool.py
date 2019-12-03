@@ -5,6 +5,8 @@ import subprocess
 from util import to_response
 from enum import Enum
 from filelock import FileLock
+import provider.fogbow.fogbow
+import threading
 
 class State(Enum):
     NOT_PROVISIONED = "not_provisioned"
@@ -186,3 +188,17 @@ def run_check(tokens):
     else:
         msg = "Pool not found!"
     return to_response(msg, result)
+
+def provider_node(pool_id, spec):
+    spec["publicKey"] = get_public_key()
+    ip = fogbow.request_node(spec)
+    args=[_, pool_id, "ansible", ip]
+    _ = pool.run_add(args)
+    _ = pool.run_provider(args)
+
+def async_provider_nodes(pool_id, spec, amount):
+    for _ in range(amount):
+        threading.Thread(target=provider_node, (pool_id, spec, )).start()
+
+    
+

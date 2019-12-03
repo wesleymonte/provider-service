@@ -38,7 +38,7 @@ class ComputeSpec:
 
 
 def get_ras_public_key():
-    endpoint = config_holder.get_ras_property(URL_JSON_KEY)
+    endpoint = config_holder.get_endpoint_from_ras(PUBLIC_KEY_EP_KEY)
     response = requests.get(endpoint)
     publicKey = response.json()['publicKey']
     return publicKey
@@ -58,9 +58,9 @@ def create_token():
 
 def create_compute(token, compute_spec):
     endpoint = config_holder.get_endpoint_from_ras(COMPUTES_EP_KEY)
-
+    body = compute_spec.to_json()
     response = requests.post(endpoint,
-                json=compute_spec.to_json(), 
+                json=body, 
                 headers={'Fogbow-User-Token':token, 'Content-Type':'application/json'})
     compute_id = response.json()['id']
     return compute_id

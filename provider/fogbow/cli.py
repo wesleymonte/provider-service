@@ -2,7 +2,6 @@ import argparse
 import http_helper
 import json
 import fogbow
-from config import *
 import sys
 
 def main():

@@ -2,6 +2,7 @@ import http_helper
 import constants
 import time
 import enum
+import uuid
 
 class ResourceState(enum.Enum):
     READY = 1
@@ -9,10 +10,10 @@ class ResourceState(enum.Enum):
 
 def sync_get_compute(token, compute_id, interval, max_tries):
     tries = 0
-    compute_state = http_helper.get_compute(token, compute_id)['state']
+    compute_state = http_helper.get_compute(token, compute_id).get('state')
     while(tries < max_tries and compute_state != ResourceState.READY.name and compute_state != ResourceState.FAILED.name):
         time.sleep(constants.INTERVAL_CHECK_COMPUTE_STATE_SEC)
-        compute_state = http_helper.get_compute(token, compute_id)['state']
+        compute_state = http_helper.get_compute(token, compute_id).get('state')
         tries += 1
     if(compute_state == ResourceState.READY.name):
         return (True, constants.COMPUTE_REQUEST_SUCCESSFUL_MESSAGE)
@@ -24,10 +25,10 @@ def sync_get_compute(token, compute_id, interval, max_tries):
 
 def sync_get_public_ip(token, public_ip_id, interval, max_tries):
     tries = 0
-    public_ip_state = http_helper.get_public_ip(token, public_ip_id)['state']
+    public_ip_state = http_helper.get_public_ip(token, public_ip_id).get('state')
     while(tries < max_tries and public_ip_state != ResourceState.READY.name and public_ip_state != ResourceState.FAILED.name):
         time.sleep(constants.INTERVAL_CHECK_PUBLIC_IP_STATE_SEC)
-        public_ip_state = http_helper.get_public_ip(token, public_ip_id)['state']
+        public_ip_state = http_helper.get_public_ip(token, public_ip_id).get('state')
         tries += 1
     if(public_ip_state == ResourceState.READY.name):
         return (True, constants.PUBLIC_IP_REQUEST_SUCCESSFUL_MESSAGE)
@@ -54,3 +55,10 @@ def create_resource(token, compute_spec):
     else:
         http_helper.delete_compute(token, compute_id)
         return message
+
+def request_node(spec):
+    computeSpec = http_helper.ComputeSpec.from_json(spec)
+    my_token = http_helper.create_token()
+    resource = create_resource(my_token, computeSpec)
+    ip = http_helper.get_public_ip(my_token, resource.get('public_ip_id')].get('ip')
+    return ip
