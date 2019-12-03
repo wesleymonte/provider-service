@@ -1,6 +1,10 @@
 import requests
 from config import *
-import constants
+from constants import *
+import json
+import os
+
+config_holder = ConfigHolder(os.path.realpath(DEFAULT_CONFIG_FILE_NAME))
 
 class ComputeSpec:
     def __init__(self, name=None, image_id=None, memory=None, vcpu=None, disk=None, public_key=None):
@@ -34,13 +38,18 @@ class ComputeSpec:
 
 
 def get_ras_public_key():
-    response = requests.get(ras_public_key_endpoint)
+    endpoint = config_holder.get_ras_property(URL_JSON_KEY)
+    response = requests.get(endpoint)
     publicKey = response.json()['publicKey']
     return publicKey
 
 def create_token():
+    as_token_username=config_holder.get_as_property(TOKEN_USERNAME_KEY)
+    as_token_password=config_holder.get_as_property(TOKEN_PASSWORD_KEY)
+    endpoint = config_holder.get_endpoint_from_as(TOKEN_ENDPOINT_KEY)
     ras_public_key = get_ras_public_key()
-    response = requests.post(as_token_endpoint,
+
+    response = requests.post(endpoint,
                 headers={'Content-Type':'application/json'},
                 json={'credentials':{'username':as_token_username, 'password':as_token_password},
                         'publicKey':ras_public_key})
@@ -48,34 +57,41 @@ def create_token():
     return token
 
 def create_compute(token, compute_spec):
-    response = requests.post(ras_compute_endpoint,
+    endpoint = config_holder.get_endpoint_from_ras(COMPUTES_EP_KEY)
+
+    response = requests.post(endpoint,
                 json=compute_spec.to_json(), 
                 headers={'Fogbow-User-Token':token, 'Content-Type':'application/json'})
     compute_id = response.json()['id']
     return compute_id
 
 def get_compute(token, compute_id):
-    response = requests.get(ras_compute_endpoint + "/" + compute_id,
+    endpoint = config_holder.get_endpoint_from_ras(COMPUTES_EP_KEY)
+    response = requests.get(endpoint + "/" + compute_id,
                 headers={'Fogbow-User-Token':token})
     return response.json()
 
 def delete_compute(token, compute_id):
-    response = requests.delete(ras_compute_endpoint + "/" + compute_id,
+    endpoint = config_holder.get_endpoint_from_ras(COMPUTES_EP_KEY)
+    response = requests.delete(endpoint + "/" + compute_id,
                 headers={'Fogbow-User-Token':token})
 
 def create_public_ip(token, compute_id):
-    response = requests.post(ras_public_ip_endpoint,
+    endpoint = config_holder.get_endpoint_from_ras(PUBLIC_IP_EP_KEY)
+    response = requests.post(endpoint,
                 headers={'Fogbow-User-Token':token, 'Content-Type':'application/json'},
                 json={'computeId':compute_id})
     public_ip_id = response.json()['id']
     return public_ip_id
 
 def get_public_ip(token, public_ip_id):
+    ras_public_ip_endpoint = config_holder.get_endpoint_from_ras(PUBLIC_IP_EP_KEY)
     response = requests.get(ras_public_ip_endpoint + "/" + public_ip_id, 
                 headers={'Fogbow-User-Token':token})
     return response.json()
 
 def delete_public_ip(token, public_ip_id):
+    ras_public_ip_endpoint = config_holder.get_endpoint_from_ras(PUBLIC_IP_EP_KEY)
     response = requests.delete(ras_public_ip_endpoint + "/" + public_ip_id,
                 headers={'Fogbow-User-Token':token})
     return response.json()

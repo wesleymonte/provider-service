@@ -1,18 +1,25 @@
-ras_url=
-ras_public_key_endpoint=
-ras_public_ip_endpoint=
-ras_compute_endpoint=
+import json
+from constants import FOGBOW_KEY
+from constants import RAS_KEY
+from constants import AS_KEY
+from constants import URL_JSON_KEY
 
-ras_member_id=
-ras_cloud_name=
-ras_images=
+class ConfigHolder():
+    def __init__(self, config_path):
+        json_data_file = open(config_path,'r+')
+        self.data = json.load(json_data_file)
+        json_data_file.close()
+    
+    def get_ras_property(self, _property):
+        return self.data[FOGBOW_KEY][RAS_KEY][_property]
 
-as_url=
-as_token_endpoint=
-as_token_username=
-as_token_password=
-as_token_domain=
+    def get_as_property(self, _property):
+        return self.data[FOGBOW_KEY][AS_KEY][_property]
+    
+    def get_endpoint_from_ras(self, endpoint):
+        ras = self.data[FOGBOW_KEY][RAS_KEY]
+        return ras[endpoint].format(ras[URL_JSON_KEY])
 
-image=
-public_key=
-default_compute_name=
+    def get_endpoint_from_as(self, endpoint):
+        _as = self.data[FOGBOW_KEY][AS_KEY]
+        return _as[endpoint].format(_as[URL_JSON_KEY])
