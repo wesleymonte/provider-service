@@ -1,6 +1,6 @@
 import requests
-from config import *
-from constants import *
+from .config import *
+from .constants import *
 import json
 import os
 

@@ -4,9 +4,9 @@ from flask import jsonify
 from flask import json
 import os
 import subprocess
-import pool
 import json as js
 import provider.fogbow.fogbow
+import pool
 
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
@@ -82,6 +82,7 @@ def request_to_fogbow_provider():
         spec = request.json.get("spec")
         if spec != None:
             pool.async_provider_nodes(pool_id, spec, amount)
+            return {"msg": "OK"}, 200
         else:
             return {"error": "Error while request fogbow resources [" + poolname + "]"}, 404
     else:

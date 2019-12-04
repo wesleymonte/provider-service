@@ -1,5 +1,5 @@
-import http_helper
-import constants
+from . import http_helper
+from . import constants
 import time
 import enum
 import uuid
@@ -60,5 +60,5 @@ def request_node(spec):
     computeSpec = http_helper.ComputeSpec.from_json(spec)
     my_token = http_helper.create_token()
     resource = create_resource(my_token, computeSpec)
-    ip = http_helper.get_public_ip(my_token, resource.get('public_ip_id')].get('ip')
+    ip = http_helper.get_public_ip(my_token, resource.get('public_ip_id')).get('ip')
     return ip

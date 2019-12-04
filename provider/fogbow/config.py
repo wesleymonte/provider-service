@@ -1,8 +1,8 @@
 import json
-from constants import FOGBOW_KEY
-from constants import RAS_KEY
-from constants import AS_KEY
-from constants import URL_JSON_KEY
+from .constants import FOGBOW_KEY
+from .constants import RAS_KEY
+from .constants import AS_KEY
+from .constants import URL_JSON_KEY
 
 class ConfigHolder():
     def __init__(self, config_path):

@@ -5,7 +5,7 @@ import subprocess
 from util import to_response
 from enum import Enum
 from filelock import FileLock
-import provider.fogbow.fogbow
+import provider.fogbow.fogbow as fogbow
 import threading
 
 class State(Enum):
@@ -47,7 +47,7 @@ def update_node_state(pool_name, ip, state):
                 break
         save(pools)
 
-def write_ip(ip):
+def write_properties(ip, user):
     config_file_path = "worker-deployment/hosts.conf"
     file = open(config_file_path, 'r')
     data = file.readlines()
@@ -55,17 +55,21 @@ def write_ip(ip):
         line = data[i]
         if line.find("deployed_worker_ip") == 0:
             data[i] = "deployed_worker_ip_1=" + ip + "\n"
-            break
+        if line.find("remote_user") == 0:
+            if user == None:
+                data[i] = "rmeote_user=ubuntu\n"
+            else:
+                data[i] = "remote_user=" + user + "\n"
     file.close()
     file = open(config_file_path, 'w+')
     file.writelines(data)
     file.close()
 
 # Run ansible given an ip and return an response
-def provision(ip):
-    write_ip(ip)
+def provision(ip, user=None):
+    write_properties(ip, user)
     _dir = "worker-deployment/"
-    command = "bash install.sh"
+    command = "sudo bash install.sh"
     os.chdir(_dir)
     exit_value = os.system(command)
     exit_code = os.WEXITSTATUS(exit_value)
@@ -111,7 +115,7 @@ def run_create(tokens):
         else:
             return to_response("Pool already exists", False)
 
-def run_provider(tokens):
+def run_provider(tokens, user=None):
     result = False
     msg = ""
 
@@ -123,7 +127,7 @@ def run_provider(tokens):
         if matching_ips:
             if provider == "ansible": 
                 update_node_state(pool_name, ip, State.PROVISIONING.value)
-                result = provision(ip)
+                result = provision(ip, user)
                 if result:
                     update_node_state(pool_name, ip, State.PROVISIONED.value)
                     msg = "Node added successfully"
@@ -192,13 +196,13 @@ def run_check(tokens):
 def provider_node(pool_id, spec):
     spec["publicKey"] = get_public_key()
     ip = fogbow.request_node(spec)
-    args=[_, pool_id, "ansible", ip]
-    _ = pool.run_add(args)
-    _ = pool.run_provider(args)
+    args=["", pool_id, "ansible", ip]
+    run_add(args)
+    run_provider(args, "fogbow")
 
 def async_provider_nodes(pool_id, spec, amount):
     for _ in range(amount):
-        threading.Thread(target=provider_node, (pool_id, spec, )).start()
+        threading.Thread(target=provider_node,args=(pool_id, spec,)).start()
 
     
 
