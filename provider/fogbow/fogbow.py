@@ -61,4 +61,5 @@ def request_node(spec):
     my_token = http_helper.create_token()
     resource = create_resource(my_token, computeSpec)
     ip = http_helper.get_public_ip(my_token, resource.get('public_ip_id')).get('ip')
+    print("Got node from fogbow: " + ip)
     return ip

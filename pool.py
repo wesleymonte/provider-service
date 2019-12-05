@@ -50,27 +50,28 @@ def update_node_state(pool_name, ip, state):
         save(pools)
 
 def write_properties(ip, user):
-    config_file_path = "worker-deployment/hosts.conf"
-    file = open(config_file_path, 'r')
-    data = file.readlines()
+    config_file = "worker-deployment/hosts.conf"
+    logging.debug("Config File Path: " + config_file)
+    _file = open(config_file, 'r')
+    data = _file.readlines()
     for i in range(len(data)):
         line = data[i]
         if line.find("deployed_worker_ip") == 0:
             data[i] = "deployed_worker_ip_1=" + ip + "\n"
         if line.find("remote_user") == 0:
             if user == None:
-                data[i] = "rmeote_user=ubuntu\n"
+                data[i] = "remote_user=ubuntu\n"
             else:
                 data[i] = "remote_user=" + user + "\n"
-    file.close()
-    file = open(config_file_path, 'w+')
-    file.writelines(data)
-    file.close()
+    _file.close()
+    _file = open(config_file, 'w+')
+    _file.writelines(data)
+    _file.close()
 
 # Run ansible given an ip and return an response
 def provision(ip, user=None):
     write_properties(ip, user)
-    _dir = "worker-deployment/"
+    _dir = os.path.realpath("worker-deployment/")
     command = "sudo bash install.sh"
     os.chdir(_dir)
     exit_value = os.system(command)
@@ -118,7 +119,7 @@ def run_create(tokens):
             return to_response("Pool already exists", False)
 
 def run_provider(tokens, user=None):
-    logging.info("Running provider: " + tokens)
+    logging.info("Running provider: " + str(tokens))
     result = False
     msg = ""
 
@@ -208,6 +209,4 @@ def provider_node(pool_id, spec):
 def async_provider_nodes(pool_id, spec, amount):
     for _ in range(amount):
         threading.Thread(target=provider_node,args=(pool_id, spec,)).start()
-
-    
 

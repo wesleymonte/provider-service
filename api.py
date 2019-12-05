@@ -5,12 +5,12 @@ from flask import json
 import os
 import subprocess
 import json as js
-import provider.fogbow.fogbow
 import pool
+import logging
 
 app = flask.Flask(__name__)
-app.config["DEBUG"] = True
 
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
 
 @app.route('/version', methods=['GET'])
 def home():
@@ -18,6 +18,7 @@ def home():
 
 @app.route('/api/v1/pools', methods=['GET'])
 def get_pools():
+    logging.info("Getting all pools")
     response = pool.load()
     return response, 200
 
@@ -80,6 +81,7 @@ def request_to_fogbow_provider():
         pool_id = request.json.get("pool_id")
         amount = request.json.get("amount")
         spec = request.json.get("spec")
+        logging.info("Requesting [{}] nodes from fogbow to [{}]".format(amount, pool_id))
         if spec != None:
             pool.async_provider_nodes(pool_id, spec, amount)
             return {"msg": "OK"}, 200
@@ -88,5 +90,5 @@ def request_to_fogbow_provider():
     else:
         return {"error":"Invalid request"}, 400
 
-
-app.run()
+if __name__ == "__main__":
+    app.run()
