@@ -7,6 +7,7 @@ from enum import Enum
 from filelock import FileLock
 import provider.fogbow.fogbow as fogbow
 import threading
+import logging
 
 class State(Enum):
     NOT_PROVISIONED = "not_provisioned"
@@ -14,12 +15,13 @@ class State(Enum):
     PROVISIONED = "provisioned"
     FAILED = "failed"
 
-default_storage_path = './storage/pools.json'
-default_lock_path = './storage/pools.json.lock'
-default_public_key_path = "./keys/pp.pub"
+default_storage_path = os.path.realpath('./storage/pools.json')
+default_lock_path = os.path.realpath('./storage/pools.json.lock')
+default_public_key_path = os.path.realpath('./keys/pp.pub')
 
 # Read from default path and return a dict
 def load():
+    logging.debug("Loading storage file")
     # TODO Check if file exists
     with open(default_storage_path, 'r') as file:
         _pools = json.load(file)
@@ -116,6 +118,7 @@ def run_create(tokens):
             return to_response("Pool already exists", False)
 
 def run_provider(tokens, user=None):
+    logging.info("Running provider: " + tokens)
     result = False
     msg = ""
 
@@ -129,10 +132,12 @@ def run_provider(tokens, user=None):
                 update_node_state(pool_name, ip, State.PROVISIONING.value)
                 result = provision(ip, user)
                 if result:
+                    logging.info("Node added successfully")
                     update_node_state(pool_name, ip, State.PROVISIONED.value)
                     msg = "Node added successfully"
                     result = True
                 else:
+                    logging.info("An error occurred while running provider")
                     update_node_state(pool_name, ip, State.FAILED.value)
                     msg = "An error occurred while running provider"
             else:
