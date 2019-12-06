@@ -7,6 +7,7 @@ import subprocess
 import json as js
 import pool
 import logging
+import util
 
 app = flask.Flask(__name__)
 
@@ -78,17 +79,17 @@ def get_public_key():
 @app.route('/api/v1/provider/fogbow', methods=['POST'])
 def request_to_fogbow_provider():
     if request.is_json:
-        pool_id = request.json.get("pool_id")
-        amount = request.json.get("amount")
-        spec = request.json.get("spec")
-        logging.info("Requesting [{}] nodes from fogbow to [{}]".format(amount, pool_id))
-        if spec != None:
+        if util.validateRequestNodesBody(request.json):
+            pool_id = request.json.get("pool_id")
+            amount = request.json.get("amount")
+            spec = request.json.get("spec")
+            logging.info("Requesting [{}] nodes from fogbow to [{}]".format(amount, pool_id))
             pool.async_provider_nodes(pool_id, spec, amount)
-            return {"msg": "OK"}, 200
+            return {"msg": "Created Request"}, 200
         else:
-            return {"error": "Error while request fogbow resources [" + poolname + "]"}, 404
+            return {"error": "Malformed request body"}, 404
     else:
-        return {"error":"Invalid request"}, 400
+        return {"error":"Request body is not an json"}, 400
 
 if __name__ == "__main__":
     app.run()
