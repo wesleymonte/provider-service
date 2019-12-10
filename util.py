@@ -4,7 +4,7 @@ def to_response(msg, result):
     return {"msg": msg, "result": result}
 
 def validateRequestNodesBody(request):
-    fields = ["pool_id", "amount", "spec"]
+    fields = ["provider", "amount", "spec"]
     for field in fields:
         if request.get(field) is None:
             logging.error("Not found field [{}] in request nodes".format(field))

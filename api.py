@@ -85,7 +85,7 @@ def create_order(pool_name):
             amount = request.json.get("amount")
             spec = request.json.get("spec")
             logging.info("Requesting [{}] nodes from fogbow to [{}]".format(amount, pool_id))
-            pool.async_provider_nodes(pool_id, spec, amount)
+            pool.create_order(pool_id, spec, amount)
             return {"msg": "Created Request"}, 201
         else:
             return {"error": "Malformed request body"}, 404
