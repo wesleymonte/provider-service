@@ -8,6 +8,7 @@ import json as js
 import pool
 import logging
 import util
+import storage
 
 app = flask.Flask(__name__)
 
@@ -20,7 +21,7 @@ def home():
 @app.route('/api/v1/pools', methods=['GET'])
 def get_pools():
     logging.info("Getting all pools")
-    response = pool.load()
+    response = storage.load_pools()
     return response, 200
 
 @app.route('/api/v1/pools/<poolname>', methods=['GET'])
@@ -76,8 +77,8 @@ def get_public_key():
     response = pool.get_public_key()
     return {"public_key": response}
 
-@app.route('/api/v1/provider/fogbow', methods=['POST'])
-def request_to_fogbow_provider():
+@app.route('/api/v1/pools/<poolname>/orders', methods=['POST'])
+def create_order(pool_name):
     if request.is_json:
         if util.validateRequestNodesBody(request.json):
             pool_id = request.json.get("pool_id")
@@ -85,7 +86,7 @@ def request_to_fogbow_provider():
             spec = request.json.get("spec")
             logging.info("Requesting [{}] nodes from fogbow to [{}]".format(amount, pool_id))
             pool.async_provider_nodes(pool_id, spec, amount)
-            return {"msg": "Created Request"}, 200
+            return {"msg": "Created Request"}, 201
         else:
             return {"error": "Malformed request body"}, 404
     else:

@@ -4,10 +4,10 @@ import os
 import subprocess
 from util import to_response
 from enum import Enum
-from filelock import FileLock
 import provider.fogbow.fogbow as fogbow
 import threading
 import logging
+import storage
 
 class State(Enum):
     NOT_PROVISIONED = "not_provisioned"
@@ -18,36 +18,6 @@ class State(Enum):
 default_storage_path = os.path.realpath('./storage/pools.json')
 default_lock_path = os.path.realpath('./storage/pools.json.lock')
 default_public_key_path = os.path.realpath('./keys/pp.pub')
-
-# Read from default path and return a dict
-def load():
-    logging.debug("Loading storage file")
-    # TODO Check if file exists
-    with open(default_storage_path, 'r') as file:
-        _pools = json.load(file)
-    return _pools
-
-# Saves a dict into a default path
-def save(dict):
-    with open(default_storage_path, 'w+') as file:
-        json.dump(dict, file, sort_keys=True, indent=4)
-
-def add_node(pool_name, ip):
-    lock = FileLock(default_lock_path)
-    with lock:
-        pools = load()
-        pools[pool_name]["nodes"].append({"ip":ip, "state":State.NOT_PROVISIONED.value})
-        save(pools)
-
-def update_node_state(pool_name, ip, state):
-    lock = FileLock(default_lock_path)
-    with lock:
-        pools = load()
-        for node in pools[pool_name]["nodes"]:
-            if node["ip"] == ip:
-                node["state"] = state
-                break
-        save(pools)
 
 def write_properties(ip, user):
     config_file = "worker-deployment/hosts.conf"
@@ -96,7 +66,7 @@ def check(ip):
         return False
 
 def run_status(tokens):
-    pools = load()
+    pools = storage.load_pools()
     _, pool_name = tokens
     if pool_name in pools:
         pool = pools[pool_name]
@@ -106,40 +76,36 @@ def run_status(tokens):
 
 # TODO validate pool name
 def run_create(tokens):
-    lock = FileLock(default_lock_path)
-    with lock:
-        pools = load()
-        _, pool_name = tokens
-        if pool_name not in pools:
-            pool = {"name":pool_name, "nodes":[]}
-            pools[pool_name] = pool
-            save(pools)
-            return to_response("Create pool [" + pool_name + "]", True )
-        else:
-            return to_response("Pool already exists", False)
+    pools = storage.load_pools()
+    _, pool_name = tokens
+    if pool_name not in pools:
+        storage.add_pool(pool_name)
+        return to_response("Create pool [" + pool_name + "]", True )
+    else:
+        return to_response("Pool already exists", False)
 
 def run_provider(tokens, user=None):
     logging.info("Running provider: " + str(tokens))
     result = False
     msg = ""
 
-    pools = load()
+    pools = storage.load_pools()
     _, pool_name, provider, ip = tokens
     if pool_name in pools:
         pool = pools[pool_name]
         matching_ips = [node["ip"] for node in pool["nodes"] if node["ip"] == ip]
         if matching_ips:
             if provider == "ansible": 
-                update_node_state(pool_name, ip, State.PROVISIONING.value)
+                storage.set_node_state(pool_name, ip, State.PROVISIONING.value)
                 result = provision(ip, user)
                 if result:
                     logging.info("Node added successfully")
-                    update_node_state(pool_name, ip, State.PROVISIONED.value)
+                    storage.set_node_state(pool_name, ip, State.PROVISIONED.value)
                     msg = "Node added successfully"
                     result = True
                 else:
                     logging.info("An error occurred while running provider")
-                    update_node_state(pool_name, ip, State.FAILED.value)
+                    storage.set_node_state(pool_name, ip, State.FAILED.value)
                     msg = "An error occurred while running provider"
             else:
                 msg = "Provider not found!"
@@ -153,14 +119,14 @@ def run_add(tokens):
     result = False
     msg = ""
 
-    pools = load()
+    pools = storage.load_pools()
     _, pool_name, provider, ip = tokens
     if pool_name in pools:
         pool = pools[pool_name]
         matching_ips = [node["ip"] for node in pool["nodes"] if node["ip"] == ip]
         if not matching_ips:
             if provider == "ansible":
-                add_node(pool_name, ip)
+                storage.add_node(pool_name, ip)
                 msg = "Node added successfully"
                 result = True
             else:
@@ -179,7 +145,7 @@ def get_public_key():
 def run_check(tokens):
     result = False
     msg = ""
-    pools = load()
+    pools = storage.load_pools()
     _, pool_name, provider = tokens
     if pool_name in pools:
         pool = pools[pool_name]
@@ -206,7 +172,11 @@ def provider_node(pool_id, spec):
     run_add(args)
     run_provider(args, "fogbow")
 
-def async_provider_nodes(pool_id, spec, amount):
+def async_provider_nodes(pool_id, amount, spec):
     for _ in range(amount):
         threading.Thread(target=provider_node,args=(pool_id, spec,)).start()
 
+def create_order(pool_id, provider, amount, spec):
+    # instance order
+    # start order
+    pass
