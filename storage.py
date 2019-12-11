@@ -46,6 +46,12 @@ def set_node_state(pool_name, ip, state):
                 break
         save_pools(pools)
 
+def get_pool(pool_name):
+    lock = FileLock(pools_lock)
+    with lock:
+        pools = load_pools()
+        return pools.get(pool_name)
+
 def load_orders():
     logging.debug("Loading storage file")
     # TODO Check if file exists
@@ -94,7 +100,7 @@ def set_order_state(order_id, state):
     lock = FileLock(orders_lock)
     with lock:
         orders = load_orders()
-        orders[order_id]["state":state]
+        orders[order_id]["state"]=state
         save_orders(orders)
 
 def add_node_provisioned(order_id, ip):

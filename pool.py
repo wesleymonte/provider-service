@@ -179,9 +179,17 @@ def async_run_order(order_id, pool_id, amount, spec):
 
 def run_order(order_id):
     order = storage.get_order(order_id)
-    storage.set_node_state(order["pool"], "running")
-    async_run_order(order.get("pool"), order.get("amount"), order.get("spec"))
+    storage.set_order_state(order_id, "running")
+    async_run_order(order_id, order.get("pool"), order.get("amount"), order.get("spec"))
 
 def create_order(pool_id, provider, amount, spec):
     order_id = storage.create_order(pool_id, provider, amount, spec)
     run_order(order_id)
+    return order_id
+
+def get_order(pool_id, order_id):
+    pool = storage.get_pool(pool_id)
+    order = None
+    if order_id in pool.get("orders"):
+        order = storage.get_order(order_id)
+    return order
