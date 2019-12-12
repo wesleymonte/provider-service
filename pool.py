@@ -8,6 +8,9 @@ import provider.fogbow.fogbow as fogbow
 import threading
 import logging
 import storage
+from distutils.dir_util import copy_tree
+import uuid
+import shutil
 
 class State(Enum):
     NOT_PROVISIONED = "not_provisioned"
@@ -19,10 +22,15 @@ default_storage_path = os.path.realpath('./storage/pools.json')
 default_lock_path = os.path.realpath('./storage/pools.json.lock')
 default_public_key_path = os.path.realpath('./keys/pp.pub')
 
-def write_properties(ip, user):
-    config_file = "worker-deployment/hosts.conf"
-    logging.debug("Config File Path: " + config_file)
-    _file = open(config_file, 'r')
+def cp_worker_deployment_folder(sufix):
+    src="worker-deployment"
+    dst="worker-deployment-" + sufix
+    copy_tree(src, dst)
+    return dst
+
+def write_properties(config_file_path, ip, user):
+    logging.debug("Config File Path: " + config_file_path)
+    _file = open(config_file_path, 'r')
     data = _file.readlines()
     for i in range(len(data)):
         line = data[i]
@@ -34,19 +42,22 @@ def write_properties(ip, user):
             else:
                 data[i] = "remote_user=" + user + "\n"
     _file.close()
-    _file = open(config_file, 'w+')
+    _file = open(config_file_path, 'w+')
     _file.writelines(data)
     _file.close()
 
 # Run ansible given an ip and return an response
 def provision(ip, user=None):
-    write_properties(ip, user)
-    _dir = os.path.realpath("worker-deployment/")
+    folder = cp_worker_deployment_folder(str(uuid.uuid4())) + "/"
+    config_file_path = folder + "hosts.conf"
+    write_properties(config_file_path, ip, user)
+    _dir = os.path.realpath(folder)
     command = "sudo bash install.sh"
     os.chdir(_dir)
     exit_value = os.system(command)
     exit_code = os.WEXITSTATUS(exit_value)
     os.chdir("..")
+    shutil.rmtree(folder)
     if exit_code == 0:
         return True
     else:
