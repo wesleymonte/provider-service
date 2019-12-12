@@ -109,3 +109,12 @@ def add_node_provisioned(order_id, ip):
         orders = load_orders()
         orders[order_id]["provisioned"].append(ip)
         save_orders(orders)
+
+def check_finish_state(order_id):
+    lock = FileLock(orders_lock)
+    with lock:
+        orders = load_orders()
+        order = orders.get(order_id)
+        if order.get("amount") == len((orders.get(order_id).get("provisioned"))):
+            order["state"] = "finished"
+            save_orders(orders)

@@ -183,6 +183,7 @@ def provider_node(order_id, pool_id, spec):
     run_add(args)
     run_provider(args, "fogbow")
     storage.add_node_provisioned(order_id, ip)
+    storage.check_finish_state(order_id)
 
 def async_run_order(order_id, pool_id, amount, spec):
     for _ in range(amount):
