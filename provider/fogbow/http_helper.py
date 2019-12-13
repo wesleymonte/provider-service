@@ -94,7 +94,6 @@ def delete_public_ip(token, public_ip_id):
     ras_public_ip_endpoint = config_holder.get_endpoint_from_ras(PUBLIC_IP_EP_KEY)
     response = requests.delete(ras_public_ip_endpoint + "/" + public_ip_id,
                 headers={'Fogbow-User-Token':token})
-    return response.json()
 
 def get_images(token):
     response = requests.get(ras_images,

@@ -179,11 +179,12 @@ def run_check(tokens):
 def provider_node(order_id, pool_id, spec):
     spec["publicKey"] = get_public_key()
     ip = fogbow.request_node(spec)
-    args=["", pool_id, "ansible", ip]
-    run_add(args)
-    run_provider(args, "fogbow")
-    storage.add_node_provisioned(order_id, ip)
-    storage.check_finish_state(order_id)
+    if ip != None:
+        args=["", pool_id, "ansible", ip]
+        run_add(args)
+        run_provider(args, "fogbow")
+        storage.add_node_provisioned(order_id, ip)
+        storage.check_finish_state(order_id)
 
 def async_run_order(order_id, pool_id, amount, spec):
     for _ in range(amount):
