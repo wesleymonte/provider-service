@@ -126,6 +126,26 @@ def run_provider(tokens, user=None):
         msg = "Pool not found!"
     return to_response(msg, result)
 
+def add_node(pool_name, driver, spec):
+    result = False
+    msg = ""
+    pools = storage.load_pools()
+    if pool_name in pools:
+        nodes = pools.get(pool_name).get("nodes")
+        matching_ips = [ip for node_id in nodes if nodes.get(node_id).get("ip") == ip]
+        if not matching_ips:
+            node_id = str(uuid.uuid4())
+            storage.add_node(pool_name, driver, spec)
+            result = True
+            msg = "Added node [{}] to pool [{}] wtih success".format(ip, pool_name)
+            logging.info(msg)
+        else:
+            msg = "There is already a node with this ip [{}]".format(ip)
+            logging.error(msg)
+    else:
+        msg = "No pool [{}] was found".format(pool_name)
+    return to_response(msg, result)
+
 def run_add(tokens):
     result = False
     msg = ""
@@ -133,8 +153,8 @@ def run_add(tokens):
     pools = storage.load_pools()
     _, pool_name, provider, ip = tokens
     if pool_name in pools:
-        pool = pools[pool_name]
-        matching_ips = [node["ip"] for node in pool["nodes"] if node["ip"] == ip]
+        nodes = pools.get(pool_name).get("")
+        matching_ips = [ip for node_id in pool.get("nodes") if pool.get("nodes").get(node_id).get("ip") == ip]
         if not matching_ips:
             if provider == "ansible":
                 storage.add_node(pool_name, ip)

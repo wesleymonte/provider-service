@@ -36,6 +36,13 @@ def add_node(pool_name, ip):
         pools[pool_name]["nodes"].append({"ip":ip, "state":"not_provisioned"})
         save_pools(pools)
 
+def add_node(pool_name, node_id, driver, spec):
+    lock = FileLock(pools_lock)
+    with lock:
+        pools = load_pools()
+        pools[pool_name]["nodes"][node_id] = {"driver":driver, "spec":spec, "state":"not_provisioned"})
+        save_pools(pools)
+
 def set_node_state(pool_name, ip, state):
     lock = FileLock(pools_lock)
     with lock:
