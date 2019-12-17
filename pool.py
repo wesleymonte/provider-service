@@ -77,6 +77,11 @@ def check(ip):
     else:
         return False
 
+def get_pools():
+    logging.info("Getting all pools")
+    pools = storage.load_pools()
+    return pools
+
 def get_pool(pool_id):
     pools = storage.load_pools()
     if pool_id not in pools:

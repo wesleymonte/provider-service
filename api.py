@@ -21,9 +21,8 @@ def home():
 
 @app.route('/api/v1/pools', methods=['GET'])
 def get_pools():
-    logging.info("Getting all pools")
-    response = storage.load_pools()
-    return response, 200
+    pools = pool.get_pools()
+    return pools, 200
 
 @app.route('/api/v1/pools/<pool_id>', methods=['GET'])
 def get_pool(pool_id):
