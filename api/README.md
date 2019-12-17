@@ -67,7 +67,7 @@
             "4426efaa-dd28-4117-aeea-c8b8930217f2" : {
                 "driver":"fogbow",
                 "template":"ansible-default",
-                "state": "provisioning",
+                "state": "provisioned",
                 "spec":{
                     "name":"worker-node-2",
                     "memory":2,
@@ -88,6 +88,19 @@
                     "disk":10,
                     "imageId":"f4ab9873-ad53-4968-ad16-01b919ba9c48"
                 }
+            },
+            "4ae031b1-8935-495f-ad7a-d48c0dc035b2" : {
+                "driver":"fogbow",
+                "template":"ansible-default",
+                "state": "setting",
+                "spec":{
+                    "name":"worker-node-4",
+                    "memory":2,
+                    "vCPU":2,
+                    "disk":10,
+                    "imageId":"f4ab9873-ad53-4968-ad16-01b919ba9c48"
+                },
+                "ip":"10.30.5.8"
             }
         }
     }
@@ -162,6 +175,19 @@
                 "disk":10,
                 "imageId":"f4ab9873-ad53-4968-ad16-01b919ba9c48"
             }
+        },
+        "4ae031b1-8935-495f-ad7a-d48c0dc035b2" : {
+            "driver":"fogbow",
+            "template":"ansible-default",
+            "state": "setting",
+            "spec":{
+                "name":"worker-node-4",
+                "memory":2,
+                "vCPU":2,
+                "disk":10,
+                "imageId":"f4ab9873-ad53-4968-ad16-01b919ba9c48"
+            },
+            "ip":"10.30.5.8"
         }
     }
 }
@@ -227,6 +253,19 @@
     "public_key": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDhokU/C8O03gSlyYzup8lq/kCbttz4oL4rI7hEwJN/P6wzeq8YHGMKO5zOtDZ4GIKSQ1S7tbwB2CmIUiFbUdOtI+9st7gfVGlK/3CLaV7Scuh9thN5wj8yRrCn9P/zLUat5mAjmXkfKm/MT+vuF+3hBRwPHCHWh1iRLL5cT3wdIgUamjeUuKMQdOdV0zxMOexxRpH7uLHIPUY1GhRE8HUVcvaVSNf/juUy+y3VZMgQujpuritQ0iUny19b04/P/wl7AbG/4hsnNcPygJC1LIZEPbV71VMl7jGwv+uacF3oSY/7HV8j7Q57HFznwljBX/KhrazIqh3S6hlaNzAqZY0h pool.provider@lsd.ufcg.edu.br"
 }
 ```
+
+## Node States
+
+![Node State Diagram](https://raw.githubusercontent.com/wesleymonte/provider-service/api/docs/api/node-state-diagram.png)
+
+| State | Description |
+| :--- | :--- |
+| `CREATED` | `Node was instantiated and saved to storage.` |
+| `PROVISIONING` | `The node is in the provisioning phase, where the driver is working to get the resource.` |
+| `PROVISIONED` | `State that represents the end of driver work. In this state the node must have an ip. The node is ready to be configured.` |
+| `SETTING` | `The node is being configured according to your template.` |
+| `READY` | `The node is ready for use.` |
+| `FAILED` | `State to represent failures during provisioning or during setup.` |
 
 ## Responses
 
