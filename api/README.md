@@ -17,7 +17,7 @@
 **Response example**
 ```json
 {
-	"msg": "Created pool [my-pool]"
+	"id": "838c9941-8a04-422b-9465-2d047b40c7da"
 }
 ```
 #### 1.2 - Retrieves a list of all pools
@@ -29,21 +29,31 @@
 **Response example**
 ```json
 {
-    "my-pool": {
+    "838c9941-8a04-422b-9465-2d047b40c7da": {
+        "id":"838c9941-8a04-422b-9465-2d047b40c7da",
         "name": "my-pool",
         "nodes": {
 	        "1ddc5e78-0d6b-45e3-9dcd-fb7347ed76f9" : {
-                "type":"loose",
+                "driver":"dry",
+                "template":"ansible-default",
                 "state": "provisioning",
+                "spec":{
+                    "ip":"10.30.5.10"
+                },
                 "ip":"10.30.5.10"
             },
             "cff3d7c3-a708-4458-badb-fb1d8643137a" : {
-                "type":"loose",
+                "driver":"dry",
+                "template":"ansible-default",
                 "state": "failed",
+                "spec":{
+                    "ip":"10.30.5.50"
+                },
                 "ip":"10.30.5.50"
             },
             "04ad57a3-a1a7-41df-879d-70e78ad9ff4b" : {
-                "type":"requested",
+                "driver":"fogbow",
+                "template":"ansible-default",
                 "state": "ready",
                 "spec":{
                     "name":"worker-node-1",
@@ -55,7 +65,8 @@
                 "ip": "10.30.5.1"
             },
             "4426efaa-dd28-4117-aeea-c8b8930217f2" : {
-                "type":"requested",
+                "driver":"fogbow",
+                "template":"ansible-default",
                 "state": "provisioning",
                 "spec":{
                     "name":"worker-node-2",
@@ -67,7 +78,8 @@
                 "ip":"10.30.5.30"
             },
             "8f8736d4-d5e8-4f63-bb3f-c252a202acb3" : {
-                "type":"requested",
+                "driver":"fogbow",
+                "template":"ansible-default",
                 "state": "created",
                 "spec":{
                     "name":"worker-node-3",
@@ -92,20 +104,30 @@
 **Response example**
 ```json
 {
+    "id":"838c9941-8a04-422b-9465-2d047b40c7da",
     "name": "my-pool",
     "nodes": {
         "1ddc5e78-0d6b-45e3-9dcd-fb7347ed76f9" : {
-            "type":"loose",
+            "driver":"dry",
+            "template":"ansible-default",
             "state": "provisioning",
+            "spec":{
+                "ip":"10.30.5.10"
+            },
             "ip":"10.30.5.10"
         },
         "cff3d7c3-a708-4458-badb-fb1d8643137a" : {
-            "type":"loose",
+            "driver":"dry",
+            "template":"ansible-default",
             "state": "failed",
+            "spec":{
+                "ip":"10.30.5.50"
+            },
             "ip":"10.30.5.50"
         },
         "04ad57a3-a1a7-41df-879d-70e78ad9ff4b" : {
-            "type":"requested",
+            "driver":"fogbow",
+            "template":"ansible-default",
             "state": "ready",
             "spec":{
                 "name":"worker-node-1",
@@ -117,7 +139,8 @@
             "ip": "10.30.5.1"
         },
         "4426efaa-dd28-4117-aeea-c8b8930217f2" : {
-            "type":"requested",
+            "driver":"fogbow",
+            "template":"ansible-default",
             "state": "provisioning",
             "spec":{
                 "name":"worker-node-2",
@@ -129,7 +152,8 @@
             "ip":"10.30.5.30"
         },
         "8f8736d4-d5e8-4f63-bb3f-c252a202acb3" : {
-            "type":"requested",
+            "driver":"fogbow",
+            "template":"ansible-default",
             "state": "created",
             "spec":{
                 "name":"worker-node-3",
@@ -142,7 +166,7 @@
     }
 }
 ```
-#### 1.4 - Adds a loose node to a given pool
+#### 1.4 - Adds a dry node to a given pool
 | Method | URI |
 | :--- | :--- |
 | `POST` | `/api/pools/{pool_id}/nodes` |
@@ -150,8 +174,11 @@
 **Request Body**
 ```json
 {
-    "type":"loose",
-    "ip":"10.30.5.10"
+    "driver":"dry",
+    "template":"ansible-default",
+    "spec":{
+        "ip":"10.30.5.10"
+    }
 }
 ```
 **Response example**
@@ -161,7 +188,7 @@
 }
 ```
 
-#### 1.5 - Adds a requested node to a given pool
+#### 1.5 - Adds a fogbow node to a given pool
 | Method | URI |
 | :--- | :--- |
 | `POST` | `/api/pools/{pool_id}/nodes` |
@@ -169,7 +196,8 @@
 **Request Body**
 ```json
 {
-    "type":"requested",
+    "driver":"fogbow",
+    "template":"ansible-default",
     "spec":{
 		"name":"worker-node",
 		"memory":2,
