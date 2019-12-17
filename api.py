@@ -25,13 +25,13 @@ def get_pools():
     response = storage.load_pools()
     return response, 200
 
-@app.route('/api/v1/pools/<poolname>', methods=['GET'])
-def get_pool(poolname):
-    args = ["status", poolname]
-    response = pool.run_status(args)
-    if not response.get("result"):
-        return {"error": "Error while getting pool [" + poolname + "]: " + response.get("msg")}, 404
-    return js.loads(response.get("msg")), 200
+@app.route('/api/v1/pools/<pool_id>', methods=['GET'])
+def get_pool(pool_id):
+    try:
+        _pool = pool.get_pool(pool_id)
+        return _pool, 200
+    except Exception as e:
+        return {"msg": messages.ERROR_MESSAGE.format(str(e))}, 400
 
 @app.route('/api/v1/pools', methods=['POST'])
 def add_pool():

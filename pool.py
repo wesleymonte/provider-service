@@ -77,14 +77,15 @@ def check(ip):
     else:
         return False
 
-def run_status(tokens):
+def get_pool(pool_id):
     pools = storage.load_pools()
-    _, pool_name = tokens
-    if pool_name in pools:
-        pool = pools[pool_name]
-        return to_response(json.dumps(pool, indent=4, sort_keys=True), True)
+    if pool_id not in pools:
+        logging.error(messages.POOL_NOT_FOUND.format(pool_id))
+        raise Exception(messages.POOL_NOT_FOUND.format(pool_id))
     else:
-        return to_response("Pool not found!", False)
+        logging.info(messages.GOT_POOL.format(pool_id))
+        pool = pools[pool_id]
+        return pool
 
 # TODO validate pool name
 def create_pool(pool_name):
