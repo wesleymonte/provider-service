@@ -9,6 +9,7 @@ import pool
 import logging
 import util
 import storage
+import messages
 
 app = flask.Flask(__name__)
 
@@ -35,18 +36,16 @@ def get_pool(poolname):
 @app.route('/api/v1/pools', methods=['POST'])
 def add_pool():
     if request.is_json:
-        name = request.json.get("name")
-        if name == None or name.strip() == "":
-            return {"error":"invalid pool name"}, 400
-        args=["create", name]
-        response = pool.run_create(args)
-        if not response.get("result"):
-            return {"error": "Error while creating pool [" + name + "]: " + response.get("msg")}, 404
-        return {"msg": response.get("msg")}, 200
+        try:
+            name = request.json.get("name")
+            pool_id = pool.create_pool(name)
+            return {"id": pool_id}, 201
+        except Exception as e:
+            return {"msg": messages.ERROR_MESSAGE.format(str(e))}, 400
     else:
-        return {"error":"Invalid request"}, 400
+        return {"msg": messages.ERROR_MESSAGE.format(messages.INVALID_REQUEST)}, 400    
 
-@app.route('/api/v1/pools/<poolname>', methods=['POST'])
+@app.route('/api/v1/pools/<poolname>/nodes', methods=['POST'])
 def add_node(poolname):
     if request.is_json:
         provider = request.json.get("provider")
@@ -77,8 +76,8 @@ def get_public_key():
     response = pool.get_public_key()
     return {"public_key": response}
 
-@app.route('/api/v1/pools/<poolname>/orders', methods=['POST'])
-def create_order(poolname):
+@app.route('/api/v1/orders', methods=['POST'])
+def create_order():
     if request.is_json:
         if util.validateRequestNodesBody(request.json):
             amount = request.json.get("amount")
@@ -91,7 +90,7 @@ def create_order(poolname):
     else:
         return {"error":"Request body is not an json"}, 400
 
-@app.route('/api/v1/pools/<poolname>/orders/<order_id>', methods=['GET'])
+@app.route('/api/v1/orders/<order_id>', methods=['GET'])
 def get_order(poolname, order_id):
     if request.is_json:
         order = pool.get_order(poolname, order_id)

@@ -21,12 +21,11 @@ def save_pools(data):
     with open(pools_storage, 'w+') as file:
         json.dump(data, file, sort_keys=True, indent=4)
 
-def add_pool(pool_name):
+def add_pool(pool_id, pool_name):
     lock = FileLock(pools_lock)
     with lock:
         pools = load_pools()
-        pool = {"name":pool_name, "nodes":[], "orders":[]}
-        pools[pool_name] = pool
+        pools[pool_id] = {"id": pool_id, "name":pool_name, "nodes":[]}
         save_pools(pools)
 
 def add_node(pool_name, ip):
@@ -40,7 +39,7 @@ def add_node(pool_name, node_id, driver, spec):
     lock = FileLock(pools_lock)
     with lock:
         pools = load_pools()
-        pools[pool_name]["nodes"][node_id] = {"driver":driver, "spec":spec, "state":"not_provisioned"})
+        pools[pool_name]["nodes"][node_id] = {"driver":driver, "spec":spec, "state":"not_provisioned"}
         save_pools(pools)
 
 def set_node_state(pool_name, ip, state):

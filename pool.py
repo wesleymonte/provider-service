@@ -4,13 +4,14 @@ import os
 import subprocess
 from util import to_response
 from enum import Enum
-import provider.fogbow.fogbow as fogbow
+import drivers.fogbow.fogbow as fogbow
 import threading
 import logging
 import storage
 from distutils.dir_util import copy_tree
 import uuid
 import shutil
+import messages
 
 class State(Enum):
     NOT_PROVISIONED = "not_provisioned"
@@ -86,14 +87,14 @@ def run_status(tokens):
         return to_response("Pool not found!", False)
 
 # TODO validate pool name
-def run_create(tokens):
-    pools = storage.load_pools()
-    _, pool_name = tokens
-    if pool_name not in pools:
-        storage.add_pool(pool_name)
-        return to_response("Create pool [" + pool_name + "]", True )
-    else:
-        return to_response("Pool already exists", False)
+def create_pool(pool_name):
+    if pool_name == None or pool_name.strip() == "":
+        logging.error("Error: " + messages.INVALID_POOL_NAME)
+        raise Exception(messages.INVALID_POOL_NAME)
+    pool_id = str(uuid.uuid4())
+    storage.add_pool(pool_id, pool_name)
+    logging.info(messages.CREATED_POOL.format(pool_name, pool_id))
+    return pool_id
 
 def run_provider(tokens, user=None):
     logging.info("Running provider: " + str(tokens))
