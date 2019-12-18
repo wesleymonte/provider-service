@@ -5,6 +5,7 @@ import subprocess
 from util import to_response
 from enum import Enum
 import drivers.fogbow.fogbow as fogbow
+import drivers.dry.dry as dry
 import threading
 import logging
 import storage
@@ -161,9 +162,9 @@ def run_driver(pool_id, node_id):
         if driver == "fogbow":
             node = storage.get_node(pool_id, node_id)
             fogbow.provider(node)
-        else:
-            # dry.provider(node)
-        # storage.save_node(node)
+        elif driver == "dry":
+            dry.provider(node)
+        storage.save_node(node)
         storage.set_node_state(pool_id, node_id, NodeState.PROVISIONED.value)
     except Exception as e:
         logging.error(messages.ERROR_RUNNING_DRIVER.format(driver, node_id, pool_id))
