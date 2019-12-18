@@ -26,7 +26,7 @@ def add_pool(pool_id, pool_name):
     with lock:
         pools = load_pools()
         pools[pool_id] = {"id": pool_id, "name":pool_name, "nodes":[]}
-        save_pools(pools)
+        save_pools(pools) 
 
 def add_node(pool_name, ip):
     lock = FileLock(pools_lock)
@@ -35,22 +35,47 @@ def add_node(pool_name, ip):
         pools[pool_name]["nodes"].append({"ip":ip, "state":"not_provisioned"})
         save_pools(pools)
 
-def add_node(pool_name, node_id, driver, spec):
+def add_node(pool_name, node_id, driver, template, spec):
     lock = FileLock(pools_lock)
     with lock:
         pools = load_pools()
-        pools[pool_name]["nodes"][node_id] = {"driver":driver, "spec":spec, "state":"not_provisioned"}
+        pools[pool_name]["nodes"][node_id] = {"driver":driver, "spec":spec, "template": template, "state":"CREATE"}
         save_pools(pools)
 
-def set_node_state(pool_name, ip, state):
+def set_node_state(pool_id, node_id, state):
     lock = FileLock(pools_lock)
     with lock:
         pools = load_pools()
-        for node in pools[pool_name]["nodes"]:
-            if node["ip"] == ip:
-                node["state"] = state
-                break
+        pools[pool_id]["nodes"][node_id]["state"] = state
         save_pools(pools)
+
+def get_node(pool_id, node_id):
+    lock = FileLock(pools_lock)
+    with lock:
+        pools = load_pools()
+        return pools.get(pool_id).get("nodes").get(node_id)
+
+def get_attribute_from_node(pool_id, node_id, attribute):
+    lock = FileLock(pools_lock)
+    with lock:
+        pools = load_pools()
+        return pools.get(pool_id).get("nodes").get(node_id).get(attribute)
+
+def get_driver(pool_id, node_id):
+    return get_attribute_from_node(pool_id, node_id, "driver")
+
+def get_template(pool_id, node_id):
+    return get_attribute_from_node(pool_id, node_id, "template")
+
+# def set_node_state(pool_name, ip, state):
+#     lock = FileLock(pools_lock)
+#     with lock:
+#         pools = load_pools()
+#         for node in pools[pool_name]["nodes"]:
+#             if node["ip"] == ip:
+#                 node["state"] = state
+#                 break
+#         save_pools(pools)
 
 def get_pool(pool_name):
     lock = FileLock(pools_lock)
@@ -91,16 +116,6 @@ def get_order(order_id):
     with lock:
         orders = load_orders()
         return orders[order_id]
-
-def set_node_state(pool_name, ip, state):
-    lock = FileLock(pools_lock)
-    with lock:
-        pools = load_pools()
-        for node in pools[pool_name]["nodes"]:
-            if node["ip"] == ip:
-                node["state"] = state
-                break
-        save_pools(pools)
 
 def set_order_state(order_id, state):
     lock = FileLock(orders_lock)

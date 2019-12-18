@@ -10,6 +10,7 @@ import logging
 import util
 import storage
 import messages
+import threading
 
 app = flask.Flask(__name__)
 
@@ -44,23 +45,23 @@ def add_pool():
     else:
         return {"msg": messages.ERROR_MESSAGE.format(messages.INVALID_REQUEST)}, 400    
 
-@app.route('/api/v1/pools/<poolname>/nodes', methods=['POST'])
-def add_node(poolname):
+@app.route('/api/v1/pools/<pool_id>/nodes', methods=['POST'])
+def add_node(pool_id):
     if request.is_json:
-        provider = request.json.get("provider")
-        ip = request.json.get("ip")
-        if ip == None or ip.strip() == "":
-            return {"error":"invalid ip"}, 400
-        args=["add", poolname, provider, ip]
-        response = pool.run_add(args)
-        if not response.get("result"):
-            return {"error": "Error while adding node [" + poolname + "]: " + response.get("msg")}, 404
-        response = pool.run_provider(args)
-        if not response.get("result"):
-            return {"error": "Error while providering node [" + poolname + "]: " + response.get("msg")}, 404
-        return {"msg": response.get("msg")}, 200
+        try:
+            pool.validate_add_node_body(request.body)
+
+            driver = request.json.get("driver")
+            template = request.json.get("template")
+            spec = request.json.get("spec")
+
+            node_id = pool.add_node(pool_id, driver, template, spec)
+            threading.Thread(target=pool.run_node,args=(pool_id, node_id,)).start()
+            return {"id": node_id}, 201
+        except Exception as e:
+            return {"msg": messages.ERROR_MESSAGE.format(str(e))}, 400
     else:
-        return {"error":"Invalid request"}, 400
+        return {"msg": messages.ERROR_MESSAGE.format(messages.INVALID_REQUEST)}, 400  
 
 @app.route('/api/v1/pools/<poolname>/status', methods=['GET'])
 def get_pool_status(poolname):
