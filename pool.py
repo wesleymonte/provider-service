@@ -6,6 +6,7 @@ from util import to_response
 from enum import Enum
 import drivers.fogbow.fogbow as fogbow
 import drivers.dry.dry as dry
+import templates.ansible as ansible
 import threading
 import logging
 import storage
@@ -105,37 +106,6 @@ def create_pool(pool_name):
     logging.info(messages.CREATED_POOL.format(pool_name, pool_id))
     return pool_id
 
-def run_provider(tokens, user=None):
-    logging.info("Running provider: " + str(tokens))
-    result = False
-    msg = ""
-
-    pools = storage.load_pools()
-    _, pool_name, provider, ip = tokens
-    if pool_name in pools:
-        pool = pools[pool_name]
-        matching_ips = [node["ip"] for node in pool["nodes"] if node["ip"] == ip]
-        if matching_ips:
-            if provider == "ansible": 
-                storage.set_node_state(pool_name, ip, State.PROVISIONING.value)
-                result = provision(ip, user)
-                if result:
-                    logging.info("Node added successfully")
-                    storage.set_node_state(pool_name, ip, State.PROVISIONED.value)
-                    msg = "Node added successfully"
-                    result = True
-                else:
-                    logging.info("An error occurred while running provider")
-                    storage.set_node_state(pool_name, ip, State.FAILED.value)
-                    msg = "An error occurred while running provider"
-            else:
-                msg = "Provider not found!"
-        else:
-            msg = "Ip not found"
-    else:
-        msg = "Pool not found!"
-    return to_response(msg, result)
-
 def validate_add_node_body(body):
     driver = body.get("driver")
     if driver not in ["fogbow", "dry"]:
@@ -176,8 +146,7 @@ def run_template(pool_id, node_id):
     try:
         storage.set_node_state(pool_id, node_id, NodeState.SETTING.value)
         if template == "ansible-default":
-            # ansible.run(node)
-        # storage.save_node(node)
+            ansible.run(node)
         storage.set_node_state(pool_id, node_id, NodeState.READY.value)
     except Exception as e:
         logging.error(messages.ERROR_RUNNING_TEMPLATE.format(driver, node_id, pool_id))
