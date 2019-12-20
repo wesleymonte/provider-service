@@ -180,34 +180,3 @@ def run_check(tokens):
     else:
         msg = "Pool not found!"
     return to_response(msg, result)
-
-def provider_node(order_id, pool_id, spec):
-    spec["publicKey"] = get_public_key()
-    ip = fogbow.request_node(spec)
-    if ip != None:
-        args=["", pool_id, "ansible", ip]
-        run_add(args)
-        run_provider(args, "fogbow")
-        storage.add_node_provisioned(order_id, ip)
-        storage.check_finish_state(order_id)
-
-def async_run_order(order_id, pool_id, amount, spec):
-    for _ in range(amount):
-        threading.Thread(target=provider_node,args=(order_id, pool_id, spec,)).start()
-
-def run_order(order_id):
-    order = storage.get_order(order_id)
-    storage.set_order_state(order_id, "running")
-    async_run_order(order_id, order.get("pool"), order.get("amount"), order.get("spec"))
-
-def create_order(pool_id, provider, amount, spec):
-    order_id = storage.create_order(pool_id, provider, amount, spec)
-    run_order(order_id)
-    return order_id
-
-def get_order(pool_id, order_id):
-    pool = storage.get_pool(pool_id)
-    order = None
-    if order_id in pool.get("orders"):
-        order = storage.get_order(order_id)
-    return order
