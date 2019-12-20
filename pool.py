@@ -63,6 +63,15 @@ def create_pool(pool_name):
     logging.info(messages.CREATED_POOL.format(pool_name, pool_id))
     return pool_id
 
+def get_node(pool_id, node_id):
+    pool = get_pool(pool_id)
+    if node_id not in pool.get("nodes"):
+        logging.error(messages.NODE_NOT_FOUND.format(pool_id, node_id))
+        raise Exception(messages.NODE_NOT_FOUND.format(pool_id, node_id))
+    else:
+        logging.info(messages.GOT_NODE.format(pool_id, node_id))
+        return pool.get("nodes").get(node_id)
+
 def validate_add_node_body(body):
     driver = body.get("driver")
     if driver not in ["fogbow", "dry"]:

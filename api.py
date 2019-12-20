@@ -63,6 +63,14 @@ def add_node(pool_id):
     else:
         return {"msg": messages.ERROR_MESSAGE.format(messages.INVALID_REQUEST)}, 400  
 
+@app.route('/api/v1/pools/<pool_id>/nodes/<node_id>', methods=['GET'])
+def get_node(pool_id, node_id):
+    try:
+        node = pool.get_node(pool_id, node_id)
+        return node, 200
+    except Exception as e:
+        return {"msg": messages.ERROR_MESSAGE.format(str(e))}, 400
+
 @app.route('/api/v1/pools/<poolname>/status', methods=['GET'])
 def get_pool_status(poolname):
     args=["check", poolname, "ansible"]
