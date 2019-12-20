@@ -76,27 +76,5 @@ def get_public_key():
     response = pool.get_public_key()
     return {"public_key": response}
 
-@app.route('/api/v1/orders', methods=['POST'])
-def create_order():
-    if request.is_json:
-        if util.validateRequestNodesBody(request.json):
-            amount = request.json.get("amount")
-            spec = request.json.get("spec")
-            logging.info("Requesting [{}] nodes from fogbow to [{}]".format(amount, poolname))
-            order_id = pool.create_order(poolname, "fogbow", amount, spec)
-            return {"id": order_id}, 201
-        else:
-            return {"error": "Malformed request body"}, 404
-    else:
-        return {"error":"Request body is not an json"}, 400
-
-@app.route('/api/v1/orders/<order_id>', methods=['GET'])
-def get_order(poolname, order_id):
-    if request.is_json:
-        order = pool.get_order(poolname, order_id)
-        return order, 200
-    else:
-        return {"error":"Request body is not an json"}, 400
-
 if __name__ == "__main__":
     app.run(debug=True)
