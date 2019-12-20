@@ -11,7 +11,7 @@ class ResourceState(enum.Enum):
     FAILED = 2
     ERROR = 3
 
-default_public_key_path = os.path.realpath('../keys/pp.pub')
+default_public_key_path = os.path.realpath('./keys/pp.pub')
 
 def get_public_key():
     with open(default_public_key_path, 'r+') as file:
@@ -62,14 +62,11 @@ def create_resource(token, compute_spec):
 
 def request_node(spec):
     spec["publicKey"] = get_public_key()
-    try:
-        computeSpec = http_helper.ComputeSpec.from_json(spec)
-        my_token = http_helper.create_token()
-        public_ip_id = create_resource(my_token, computeSpec)
-        ip = http_helper.get_public_ip(my_token, resource.get('public_ip_id')).get('ip')
-        return ip
-    except Exception as e:
-        logging.error(str(e))
+    computeSpec = http_helper.ComputeSpec.from_json(spec)
+    my_token = http_helper.create_token()
+    public_ip_id = create_resource(my_token, computeSpec)
+    ip = http_helper.get_public_ip(my_token, public_ip_id).get('ip')
+    return ip
 
 def provider(node):
     ip = request_node(node.get("spec"))

@@ -1,4 +1,4 @@
-COMPUTE_REQUEST_SUCCESSFUL_MESSAGE = "Successful: Created a compute instance."
+COMPUTE_REQUEST_SUCCESSFUL_MESSAGE = "Successful: Compute instance is ready."
 COMPUTE_REQUEST_FAILED_MESSAGE = "Failed: Could not create a compute instance."
 COMPUTE_REQUEST_MAX_TRIES_MESSAGE = "Failed: Maximum compute state verification attempts reached."
 
