@@ -42,6 +42,13 @@ def add_node(pool_name, node_id, driver, template, spec):
         pools[pool_name]["nodes"][node_id] = {"driver":driver, "spec":spec, "template": template, "state":"CREATE"}
         save_pools(pools)
 
+def save_node(pool_id, node_id, node):
+    lock = FileLock(pools_lock)
+    with lock:
+        pools = load_pools()
+        pools[pool_id]["nodes"][node_id] = node
+        save_pools(pools)
+
 def set_node_state(pool_id, node_id, state):
     lock = FileLock(pools_lock)
     with lock:

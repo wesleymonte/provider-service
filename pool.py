@@ -134,7 +134,7 @@ def run_driver(pool_id, node_id):
             fogbow.provider(node)
         elif driver == "dry":
             dry.provider(node)
-        storage.save_node(node)
+        storage.save_node(pool_id, node_id, node)
         storage.set_node_state(pool_id, node_id, NodeState.PROVISIONED.value)
     except Exception as e:
         logging.error(messages.ERROR_RUNNING_DRIVER.format(driver, node_id, pool_id))
@@ -142,11 +142,13 @@ def run_driver(pool_id, node_id):
         raise e
 
 def run_template(pool_id, node_id):
-    template = storage.get_template()
+    template = storage.get_template(pool_id, node_id)
     try:
         storage.set_node_state(pool_id, node_id, NodeState.SETTING.value)
         if template == "ansible-default":
+            node = storage.get_node(pool_id, node_id)
             ansible.run(node)
+        storage.save_node(pool_id, node_id, node)
         storage.set_node_state(pool_id, node_id, NodeState.READY.value)
     except Exception as e:
         logging.error(messages.ERROR_RUNNING_TEMPLATE.format(driver, node_id, pool_id))
