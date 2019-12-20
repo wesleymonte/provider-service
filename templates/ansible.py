@@ -40,3 +40,6 @@ def provision(ip, user=None):
         return False
 
 def run(node):
+    user = node.get("spec")("user")
+    ip = node.get("ip")
+    provision(ip, user=user)
