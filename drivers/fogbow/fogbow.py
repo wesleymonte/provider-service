@@ -74,4 +74,6 @@ def request_node(spec):
 def provider(node):
     ip = request_node(node.get("spec"))
     node["ip"] = ip
+    #TODO Review the correct local for user field
+    node["spec"]["user"] = "fogbow"
     return ip
