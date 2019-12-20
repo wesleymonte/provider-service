@@ -23,51 +23,9 @@ class NodeState(Enum):
     READY = "READY"
     FAILED = "FAILED"
 
-default_storage_path = os.path.realpath('./storage/pools.json')
-default_lock_path = os.path.realpath('./storage/pools.json.lock')
 default_public_key_path = os.path.realpath('./keys/pp.pub')
 
-def cp_worker_deployment_folder(sufix):
-    src="worker-deployment"
-    dst="worker-deployment-" + sufix
-    copy_tree(src, dst)
-    return dst
-
-def write_properties(config_file_path, ip, user):
-    logging.debug("Config File Path: " + config_file_path)
-    _file = open(config_file_path, 'r')
-    data = _file.readlines()
-    for i in range(len(data)):
-        line = data[i]
-        if line.find("deployed_worker_ip") == 0:
-            data[i] = "deployed_worker_ip_1=" + ip + "\n"
-        if line.find("remote_user") == 0:
-            if user == None:
-                data[i] = "remote_user=ubuntu\n"
-            else:
-                data[i] = "remote_user=" + user + "\n"
-    _file.close()
-    _file = open(config_file_path, 'w+')
-    _file.writelines(data)
-    _file.close()
-
-# Run ansible given an ip and return an response
-def provision(ip, user=None):
-    folder = cp_worker_deployment_folder(str(uuid.uuid4())) + "/"
-    config_file_path = folder + "hosts.conf"
-    write_properties(config_file_path, ip, user)
-    _dir = os.path.realpath(folder)
-    command = "sudo bash install.sh"
-    os.chdir(_dir)
-    exit_value = os.system(command)
-    exit_code = os.WEXITSTATUS(exit_value)
-    os.chdir("..")
-    shutil.rmtree(folder)
-    if exit_code == 0:
-        return True
-    else:
-        return False
-
+#TODO move to ansible template
 def check(ip):
     write_ip(ip)
     _dir = "worker-deployment/"
@@ -96,7 +54,6 @@ def get_pool(pool_id):
         pool = pools[pool_id]
         return pool
 
-# TODO validate pool name
 def create_pool(pool_name):
     if pool_name == None or pool_name.strip() == "":
         logging.error("Error: " + messages.INVALID_POOL_NAME)
@@ -155,11 +112,11 @@ def run_template(pool_id, node_id):
         storage.set_node_state(pool_id, node_id, NodeState.FAILED.value)
         raise e
 
-
 def get_public_key():
     with open(default_public_key_path, 'r+') as file:
         return file.read()
 
+#TODO move to ansible template
 def run_check(tokens):
     result = False
     msg = ""
