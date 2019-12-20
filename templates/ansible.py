@@ -1,3 +1,9 @@
+import os
+from distutils.dir_util import copy_tree
+import logging
+import shutil
+import uuid
+
 def cp_worker_deployment_folder(sufix):
     src="worker-deployment"
     dst="worker-deployment-" + sufix
@@ -23,7 +29,6 @@ def write_properties(config_file_path, ip, user):
     _file.close()
 
 def provision(ip, user=None):
-    os.chdir("..")
     folder = cp_worker_deployment_folder(str(uuid.uuid4())) + "/"
     config_file_path = folder + "hosts.conf"
     write_properties(config_file_path, ip, user)
@@ -32,7 +37,7 @@ def provision(ip, user=None):
     os.chdir(_dir)
     exit_value = os.system(command)
     exit_code = os.WEXITSTATUS(exit_value)
-    os.chdir("templates")
+    os.chdir("..")
     shutil.rmtree(folder)
     if exit_code == 0:
         return True
@@ -40,6 +45,6 @@ def provision(ip, user=None):
         return False
 
 def run(node):
-    user = node.get("spec")("user")
+    user = node.get("spec").get("user")
     ip = node.get("ip")
     provision(ip, user=user)
