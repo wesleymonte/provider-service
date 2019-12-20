@@ -10,6 +10,12 @@ class ResourceState(enum.Enum):
     FAILED = 2
     ERROR = 3
 
+default_public_key_path = os.path.realpath('../keys/pp.pub')
+
+def get_public_key():
+    with open(default_public_key_path, 'r+') as file:
+        return file.read()
+
 def sync_get_compute(token, compute_id, interval, max_tries):
     tries = 0
     compute_state = http_helper.get_compute(token, compute_id).get('state')
@@ -54,6 +60,7 @@ def create_resource(token, compute_spec):
         raise e
 
 def request_node(spec):
+    spec["publicKey"] = get_public_key()
     try:
         computeSpec = http_helper.ComputeSpec.from_json(spec)
         my_token = http_helper.create_token()
