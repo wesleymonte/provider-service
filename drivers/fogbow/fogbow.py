@@ -4,6 +4,7 @@ import time
 import enum
 import uuid
 import logging
+import os
 
 class ResourceState(enum.Enum):
     READY = 1
@@ -26,9 +27,9 @@ def sync_get_compute(token, compute_id, interval, max_tries):
     if(compute_state == ResourceState.READY.name):
         logging.info(constants.COMPUTE_REQUEST_SUCCESSFUL_MESSAGE)
     elif(compute_state == ResourceState.FAILED.name):
-        raise Exception(constants.COMPUTE_REQUEST_FAILED_MESSAGE))
+        raise Exception(constants.COMPUTE_REQUEST_FAILED_MESSAGE)
     elif(tries == max_tries):
-        raise Exception(constants.COMPUTE_REQUEST_MAX_TRIES_MESSAGE))
+        raise Exception(constants.COMPUTE_REQUEST_MAX_TRIES_MESSAGE)
 
 def sync_get_public_ip(token, public_ip_id, interval, max_tries):
     tries = 0
@@ -40,7 +41,7 @@ def sync_get_public_ip(token, public_ip_id, interval, max_tries):
     if(public_ip_state == ResourceState.READY.name):
         logging.info(constants.PUBLIC_IP_REQUEST_SUCCESSFUL_MESSAGE)
     elif(public_ip_state == ResourceState.FAILED.name):
-        raise Exception(constants.PUBLIC_IP_REQUEST_FAILED_MESSAGE))
+        raise Exception(constants.PUBLIC_IP_REQUEST_FAILED_MESSAGE)
     elif (public_ip_state == ResourceState.ERROR.name):
         raise Exception(constants.PUBLIC_IP_REQUEST_ERROR_MESSAGE)
     elif(tries == max_tries):
