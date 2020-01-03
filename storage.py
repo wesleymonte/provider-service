@@ -26,13 +26,6 @@ def add_pool(pool_id, pool_name):
     with lock:
         pools = load_pools()
         pools[pool_id] = {"id": pool_id, "name":pool_name, "nodes":[]}
-        save_pools(pools) 
-
-def add_node(pool_name, ip):
-    lock = FileLock(pools_lock)
-    with lock:
-        pools = load_pools()
-        pools[pool_name]["nodes"].append({"ip":ip, "state":"not_provisioned"})
         save_pools(pools)
 
 def add_node(pool_id, node_id, driver, template, spec):
