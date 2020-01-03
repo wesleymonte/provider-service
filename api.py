@@ -49,7 +49,7 @@ def add_pool():
 def add_node(pool_id):
     if request.is_json:
         try:
-            pool.validate_add_node_body(request.json)
+            pool.validate_node_body(request.json)
 
             driver = request.json.get("driver")
             template = request.json.get("template")

@@ -72,10 +72,13 @@ def get_node(pool_id, node_id):
         logging.info(messages.GOT_NODE.format(pool_id, node_id))
         return pool.get("nodes").get(node_id)
 
-def validate_add_node_body(body):
+def validate_node_body(body):
     driver = body.get("driver")
     if driver not in ["fogbow", "dry"]:
         raise Exception(messages.INVALID_DRIVER)
+    template = body.get("template")
+    if template not in ["ansible-default", None]:
+        raise Exception(messages.INVALID_TEMPLATE)
 
 def add_node(pool_id, driver, template, spec):
     node_id = str(uuid.uuid4())
