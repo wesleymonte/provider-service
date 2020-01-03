@@ -77,7 +77,7 @@ def validate_node_body(body):
     if driver not in ["fogbow", "dry"]:
         raise Exception(messages.INVALID_DRIVER)
     template = body.get("template")
-    if template not in ["ansible-default", None]:
+    if template not in ["ansible-default"]:
         raise Exception(messages.INVALID_TEMPLATE)
 
 def add_node(pool_id, driver, template, spec):
