@@ -35,11 +35,11 @@ def add_node(pool_name, ip):
         pools[pool_name]["nodes"].append({"ip":ip, "state":"not_provisioned"})
         save_pools(pools)
 
-def add_node(pool_name, node_id, driver, template, spec):
+def add_node(pool_id, node_id, driver, template, spec):
     lock = FileLock(pools_lock)
     with lock:
         pools = load_pools()
-        pools[pool_name]["nodes"][node_id] = {"driver":driver, "spec":spec, "template": template, "state":"CREATE"}
+        pools[pool_id]["nodes"][node_id] = {"driver":driver, "spec":spec, "template": template, "state":"CREATE"}
         save_pools(pools)
 
 def save_node(pool_id, node_id, node):
