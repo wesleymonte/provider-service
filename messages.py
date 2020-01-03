@@ -1,3 +1,4 @@
+GETTING_POOLS = "Getting all pools"
 CREATED_POOL = "Created pool [{}] with id [{}]"
 INVALID_POOL_NAME = "The pool name is none or empty"
 INVALID_REQUEST = "Request body is not a json"

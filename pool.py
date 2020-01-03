@@ -40,7 +40,7 @@ def check(ip):
         return False
 
 def get_pools():
-    logging.info("Getting all pools")
+    logging.info(messages.GETTING_POOLS)
     pools = storage.load_pools()
     return pools
 
