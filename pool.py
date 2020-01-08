@@ -98,8 +98,8 @@ def run_driver(pool_id, node_id):
     logging.info(messages.STARTING_DRIVER.format(driver, node_id, pool_id))
     try:
         storage.set_node_state(pool_id, node_id, NodeState.PROVISIONING.value)
+        node = storage.get_node(pool_id, node_id)
         if driver == "fogbow":
-            node = storage.get_node(pool_id, node_id)
             fogbow.provider(node)
         elif driver == "dry":
             dry.provider(node)
